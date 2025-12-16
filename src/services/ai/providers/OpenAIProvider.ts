@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { AIProvider, EmailAnalysis } from '../types';
+import { emailAnalysisSchema } from '../responseSchema';
 import { config } from '../../../config/env';
 
 let client: OpenAI | null = null;
@@ -46,12 +47,19 @@ async function analyzeEmail(email: string): Promise<EmailAnalysis> {
         throw new Error('No response from OpenAI');
     }
 
+    let analysis: EmailAnalysis;
     try {
-        const analysis = JSON.parse(content) as EmailAnalysis;
-        return analysis;
-    } catch (error) {
+        analysis = JSON.parse(content) as EmailAnalysis;
+    } catch {
         throw new Error('Failed to parse OpenAI response');
     }
+
+    const valid = emailAnalysisSchema.safeParse(analysis);
+    if (!valid.success) {
+        throw new Error('AI response validation failed');
+    }
+
+    return valid.data;
 }
 
 export const OpenAIProvider: AIProvider = {
