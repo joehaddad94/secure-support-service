@@ -1,19 +1,24 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { sanitizePII } from '../utils/piiSanitizer';
 import { analyzeEmail } from '../services/ai/AIService';
 import { createProvider } from '../services/ai/ProviderFactory';
 import { config } from '../config/env';
 import { analyzeEmailSchema } from '../validators/email.validator';
+import { AppError } from '../middleware/errorHandler';
 
-export async function analyzeEmailController(req: Request, res: Response) {
+export async function analyzeEmailController(
+    req: Request,
+    res: Response,
+    next: NextFunction
+) {
     try {
         const validation = analyzeEmailSchema.safeParse(req.body);
         
         if (!validation.success) {
-            return res.status(400).json({ 
-                error: 'Validation failed',
-                details: validation.error.issues 
-            });
+            const err: AppError = new Error('Validation failed');
+            err.statusCode = 400;
+            (err as any).details = validation.error.issues;
+            return next(err);
         }
 
         const { email } = validation.data;
@@ -29,7 +34,7 @@ export async function analyzeEmailController(req: Request, res: Response) {
             redactions: sanitized.redactions,
         });
     } catch (error: any) {
-        res.status(500).json({ error: error.message || 'Failed to analyze email' });
+        next(error);
     }
 }
 
