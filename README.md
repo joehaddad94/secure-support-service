@@ -31,11 +31,30 @@ curl -X POST http://localhost:3001/api/analyze-email \
   -H "x-ai-provider: mock-anthropic" \
   -d '{ "email": "Hi, my card 4111-1111-1111-1111 was charged twice." }'
 ```
-Response includes:
-- `analysis` (intent, sentiment, summary, suggestedReply, urgency)
-- `provider` (which provider succeeded)
-- `redactions` (what PII was scrubbed)
-- `attemptedProviders` (order tried, useful for fallback visibility)
+## Response Structure
+
+```json
+{
+    "analysis": {
+        "intent": "string - brief description of what the customer wants",
+        "sentiment": "positive | neutral | negative",
+        "summary": "string - short summary of the email",
+        "suggestedReply": "string - draft reply to the customer",
+        "urgency": "low | medium | high"
+    },
+    "provider": "string - which provider succeeded (e.g., 'openai', 'mock-anthropic', 'mock-gemini')",
+    "redactions": [
+        {
+            "type": "CREDIT_CARD | SSN | EMAIL | PHONE",
+            "placeholder": "string - placeholder used (e.g., '[REDACTED_CREDIT_CARD]')",
+            "count": "number - how many instances were redacted"
+        }
+    ],
+    "attemptedProviders": [
+        "array of strings - order of providers tried (useful for fallback visibility)"
+    ]
+}
+```
 
 ## Postman Examples
 
