@@ -65,3 +65,20 @@ function isValidCreditCard(cardNumber: string): boolean {
     
     return sum % 10 === 0;
 }
+
+function sanitizeCreditCards(text: string): { sanitized: string; count: number } {
+    const matches = text.match(PII_PATTERNS.CREDIT_CARD);
+    let count = 0;
+    let sanitized = text;
+    
+    if (matches) {
+        matches.forEach(match => {
+            if (isValidCreditCard(match)) {
+                sanitized = sanitized.replace(match, PLACEHOLDERS.CREDIT_CARD);
+                count++;
+            }
+        });
+    }
+    
+    return { sanitized, count };
+}
