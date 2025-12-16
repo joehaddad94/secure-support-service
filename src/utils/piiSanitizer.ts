@@ -82,3 +82,93 @@ function sanitizeCreditCards(text: string): { sanitized: string; count: number }
     
     return { sanitized, count };
 }
+
+export function sanitizePII(text: string): SanitizationResult {
+    if (!text || typeof text !== 'string') {
+        return {
+            sanitizedText: text || '',
+            redactions: [],
+        };
+    }
+    
+    let sanitized = text;
+    const redactions: Array<{ type: string; placeholder: string; count: number }> = [];
+    
+    const creditCardResult = sanitizeCreditCards(sanitized);
+    sanitized = creditCardResult.sanitized;
+    if (creditCardResult.count > 0) {
+        redactions.push({
+            type: 'CREDIT_CARD',
+            placeholder: PLACEHOLDERS.CREDIT_CARD,
+            count: creditCardResult.count,
+        });
+    }
+    
+    const ssnResult = sanitizePattern(
+        sanitized,
+        PII_PATTERNS.SSN,
+        PLACEHOLDERS.SSN,
+        'SSN'
+    );
+    sanitized = ssnResult.sanitized;
+    if (ssnResult.count > 0) {
+        redactions.push({
+            type: 'SSN',
+            placeholder: PLACEHOLDERS.SSN,
+            count: ssnResult.count,
+        });
+    }
+    
+    const emailResult = sanitizePattern(
+        sanitized,
+        PII_PATTERNS.EMAIL,
+        PLACEHOLDERS.EMAIL,
+        'EMAIL'
+    );
+    sanitized = emailResult.sanitized;
+    if (emailResult.count > 0) {
+        redactions.push({
+            type: 'EMAIL',
+            placeholder: PLACEHOLDERS.EMAIL,
+            count: emailResult.count,
+        });
+    }
+    
+    const phoneResult = sanitizePattern(
+        sanitized,
+        PII_PATTERNS.PHONE,
+        PLACEHOLDERS.PHONE,
+        'PHONE'
+    );
+    sanitized = phoneResult.sanitized;
+    if (phoneResult.count > 0) {
+        redactions.push({
+            type: 'PHONE',
+            placeholder: PLACEHOLDERS.PHONE,
+            count: phoneResult.count,
+        });
+    }
+    
+    return {
+        sanitizedText: sanitized,
+        redactions,
+    };
+}
+
+export function sanitizeSpecificPII(
+    text: string,
+    type: 'CREDIT_CARD' | 'SSN' | 'EMAIL' | 'PHONE'
+): string {
+    switch (type) {
+        case 'CREDIT_CARD':
+            return sanitizeCreditCards(text).sanitized;
+        case 'SSN':
+            return sanitizePattern(text, PII_PATTERNS.SSN, PLACEHOLDERS.SSN, 'SSN').sanitized;
+        case 'EMAIL':
+            return sanitizePattern(text, PII_PATTERNS.EMAIL, PLACEHOLDERS.EMAIL, 'EMAIL').sanitized;
+        case 'PHONE':
+            return sanitizePattern(text, PII_PATTERNS.PHONE, PLACEHOLDERS.PHONE, 'PHONE').sanitized;
+        default:
+            return text;
+    }
+}
