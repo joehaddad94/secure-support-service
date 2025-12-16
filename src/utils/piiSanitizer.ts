@@ -131,21 +131,3 @@ export function sanitizePII(text: string): SanitizationResult {
         redactions,
     };
 }
-
-export function sanitizeSpecificPII(
-    text: string,
-    type: 'CREDIT_CARD' | 'SSN' | 'EMAIL' | 'PHONE'
-): string {
-    switch (type) {
-        case 'CREDIT_CARD':
-            return sanitizeCreditCards(text).sanitized;
-        case 'SSN':
-            return sanitizePattern(text, PII_PATTERNS.SSN, PLACEHOLDERS.SSN, 'SSN').sanitized;
-        case 'EMAIL':
-            return sanitizePattern(text, PII_PATTERNS.EMAIL, PLACEHOLDERS.EMAIL, 'EMAIL').sanitized;
-        case 'PHONE':
-            return sanitizePattern(text, PII_PATTERNS.PHONE, PLACEHOLDERS.PHONE, 'PHONE').sanitized;
-        default:
-            return text;
-    }
-}
