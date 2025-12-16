@@ -24,5 +24,44 @@ const PLACEHOLDERS = {
     PHONE: '[REDACTED_PHONE]',
 };
 
+function sanitizePattern(
+    text: string,
+    pattern: RegExp,
+    placeholder: string,
+    type: string
+): { sanitized: string; count: number } {
+    const matches = text.match(pattern);
+    const count = matches ? matches.length : 0;
+    
+    const sanitized = text.replace(pattern, placeholder);
+    
+    return { sanitized, count };
+}
 
+function isValidCreditCard(cardNumber: string): boolean {
 
+    const digits = cardNumber.replace(/[-\s]/g, '');
+    
+    if (!/^\d{13,19}$/.test(digits)) {
+        return false;
+    }
+    
+    let sum = 0;
+    let isEven = false;
+    
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let digit = parseInt(digits[i], 10);
+        
+        if (isEven) {
+            digit *= 2;
+            if (digit > 9) {
+                digit -= 9;
+            }
+        }
+        
+        sum += digit;
+        isEven = !isEven;
+    }
+    
+    return sum % 10 === 0;
+}
