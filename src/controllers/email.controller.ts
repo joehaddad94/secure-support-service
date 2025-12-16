@@ -3,15 +3,20 @@ import { sanitizePII } from '../utils/piiSanitizer';
 import { analyzeEmail } from '../services/ai/AIService';
 import { createProvider } from '../services/ai/ProviderFactory';
 import { config } from '../config/env';
+import { analyzeEmailSchema } from '../validators/email.validator';
 
 export async function analyzeEmailController(req: Request, res: Response) {
     try {
-        const { email } = req.body;
-
-        if (!email || typeof email !== 'string') {
-            return res.status(400).json({ error: 'Email content is required' });
+        const validation = analyzeEmailSchema.safeParse(req.body);
+        
+        if (!validation.success) {
+            return res.status(400).json({ 
+                error: 'Validation failed',
+                details: validation.error.issues 
+            });
         }
 
+        const { email } = validation.data;
         const providerName = req.headers['x-ai-provider'] as string || config.aiProvider;
         const provider = createProvider(providerName);
 
