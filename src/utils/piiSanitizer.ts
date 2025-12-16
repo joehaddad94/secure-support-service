@@ -1,11 +1,4 @@
-export interface SanitizationResult {
-    sanitizedText: string;
-    redactions: Array<{
-        type: string;
-        placeholder: string;
-        count: number;
-    }>;
-}
+import { SanitizationResult } from './types';
 
 const PII_PATTERNS = {
     CREDIT_CARD: /\b(?:\d[ -]*?){13,19}\b/g,
