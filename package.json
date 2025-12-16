@@ -2,7 +2,8 @@
   "dependencies": {
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "openai": "^6.13.0"
+    "openai": "^6.13.0",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
