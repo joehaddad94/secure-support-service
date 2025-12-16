@@ -17,5 +17,12 @@ const PII_PATTERNS = {
     PHONE: /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
 };
 
+const PLACEHOLDERS = {
+    CREDIT_CARD: '[REDACTED_CREDIT_CARD]',
+    SSN: '[REDACTED_SSN]',
+    EMAIL: '[REDACTED_EMAIL]',
+    PHONE: '[REDACTED_PHONE]',
+};
+
 
 
