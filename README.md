@@ -24,7 +24,7 @@ API base: `http://localhost:3001/api`
 - Optional header: `x-ai-provider` to override provider per request  
   - `openai`, `mock-anthropic`, `mock-gemini`
 
-## Sample cURL (provider override + shows fallback order)
+## Sample CURL
 ```bash
 curl -X POST http://localhost:3001/api/analyze-email \
   -H "Content-Type: application/json" \
