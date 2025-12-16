@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { AIProvider, EmailAnalysis } from '../types';
-import { emailAnalysisSchema } from '../responseSchema';
+import { emailAnalysisSchema } from '../../../validators/responseSchema';
 import { config } from '../../../config/env';
 
 let client: OpenAI | null = null;
