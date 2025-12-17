@@ -2,16 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { analyzeEmailController } from '../email.controller';
 import { analyzeEmail } from '../../services/ai/AIService';
 import { sanitizePII } from '../../utils/piiSanitizer';
-import { config } from '../../config/env';
 
-// Mock dependencies
 jest.mock('../../services/ai/AIService');
 jest.mock('../../utils/piiSanitizer');
-jest.mock('../../config/env', () => ({
-    config: {
-        aiProvider: 'default-provider',
-    },
-}));
 
 const mockAnalyzeEmail = analyzeEmail as jest.MockedFunction<typeof analyzeEmail>;
 const mockSanitizePII = sanitizePII as jest.MockedFunction<typeof sanitizePII>;
@@ -41,7 +34,6 @@ describe('Email Controller', () => {
 
         jest.clearAllMocks();
 
-        // Default successful mocks
         mockSanitizePII.mockReturnValue({
             sanitizedText: 'sanitized email',
             redactions: [],
