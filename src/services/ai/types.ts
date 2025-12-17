@@ -9,6 +9,7 @@ export interface EmailAnalysis {
 export interface AIProviderResponse {
     analysis: EmailAnalysis;
     provider: string;
+    attemptedProviders: string[];
 }
 
 export interface AIProvider {
