@@ -45,17 +45,24 @@ function isValidCreditCard(cardNumber: string): boolean {
 
 function sanitizeCreditCards(text: string): { sanitized: string; count: number } {
     const matches = text.match(PII_PATTERNS.CREDIT_CARD);
-    let count = 0;
     let sanitized = text;
+    const validCards = new Set<string>();
     
     if (matches) {
         matches.forEach(match => {
             if (isValidCreditCard(match)) {
-                sanitized = sanitized.replace(match, PLACEHOLDERS.CREDIT_CARD);
-                count++;
+                validCards.add(match);
             }
         });
+        
+        validCards.forEach(cardNumber => {
+            const escapedCard = cardNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escapedCard, 'g');
+            sanitized = sanitized.replace(regex, PLACEHOLDERS.CREDIT_CARD);
+        });
     }
+    
+    const count = matches ? matches.filter(match => isValidCreditCard(match)).length : 0;
     
     return { sanitized, count };
 }
