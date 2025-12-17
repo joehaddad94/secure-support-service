@@ -1,47 +1,45 @@
-import { AIProvider, AIProviderResponse } from './types';
+import { AIProviderResponse } from './types';
 import { createProvider, getAvailableProviders } from './ProviderFactory';
 
-export async function analyzeEmail(
-    provider: AIProvider,
-    email: string
-): Promise<AIProviderResponse> {
-    if (!provider.isAvailable()) {
-        throw new Error('Provider not available');
-    }
-
-    const analysis = await provider.analyzeEmail(email);
-
-    return {
-        analysis,
-        provider: provider.getName(),
-        attemptedProviders: [provider.getName()],
-    };
-}
-
-export interface AnalyzeEmailWithFallbackOptions {
+export interface AnalyzeEmailOptions {
     primaryProvider?: string;
     email: string;
 }
 
-export async function analyzeEmailWithFallback(
-    options: AnalyzeEmailWithFallbackOptions
+export async function analyzeEmail(
+    options: AnalyzeEmailOptions
 ): Promise<AIProviderResponse> {
     const { primaryProvider, email } = options;
+    
     const allProviders = getAvailableProviders();
     const fallbackOrder = primaryProvider
         ? [primaryProvider, ...allProviders.filter(p => p !== primaryProvider)]
         : allProviders;
 
+    if (fallbackOrder.length === 0) {
+        throw new Error('No AI providers available');
+    }
+
     let lastError: Error | null = null;
-    
+    const attemptedProviders: string[] = [];
+
     for (const providerName of fallbackOrder) {
+        attemptedProviders.push(providerName);
+        
         try {
             const provider = createProvider(providerName);
-            const result = await analyzeEmail(provider, email);
+            
+            if (!provider.isAvailable()) {
+                lastError = new Error(`Provider ${providerName} is not available`);
+                continue;
+            }
+
+            const analysis = await provider.analyzeEmail(email);
             
             return {
-                ...result,
-                attemptedProviders: fallbackOrder,
+                analysis,
+                provider: provider.getName(),
+                attemptedProviders,
             };
         } catch (err) {
             lastError = err instanceof Error ? err : new Error(String(err));
@@ -50,7 +48,7 @@ export async function analyzeEmailWithFallback(
     }
 
     throw new Error(
-        `All providers failed. Last error: ${lastError?.message || 'unknown error'}`
+        `All providers failed. Attempted: ${attemptedProviders.join(', ')}. Last error: ${lastError?.message || 'unknown error'}`
     );
 }
 

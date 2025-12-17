@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { sanitizePII } from '../utils/piiSanitizer';
-import { analyzeEmailWithFallback } from '../services/ai/AIService';
+import { analyzeEmail } from '../services/ai/AIService';
 import { config } from '../config/env';
 import { analyzeEmailSchema } from '../validators/email.validator';
 import { AppError } from '../middleware/errorHandler';
@@ -24,7 +24,7 @@ export async function analyzeEmailController(
         const sanitized = sanitizePII(email);
         const primaryProvider = (req.headers['x-ai-provider'] as string) || config.aiProvider;
 
-        const result = await analyzeEmailWithFallback({
+        const result = await analyzeEmail({
             primaryProvider,
             email: sanitized.sanitizedText,
         });
